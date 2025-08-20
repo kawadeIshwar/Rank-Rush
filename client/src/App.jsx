@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { api, API_URL } from "./api";
 import UserSelect from "./components/UserSelect";
 import AddUserForm from "./components/AddUserForm";
-import { toast } from "react-toastify"; 
+import { toast } from "react-toastify";
 
 const SOCKET_URL = API_URL.replace(/\/api$/, "");
 
@@ -51,7 +51,6 @@ export default function App() {
         points: payload.claim.points,
       });
 
-      //  show toast on new award
       toast.info(`🎉 ${payload.claim.userName} got +${payload.claim.points} pts!`, {
         position: "top-center",
       });
@@ -64,8 +63,7 @@ export default function App() {
     setBusy(true);
     try {
       await api.post("/claim", { userId: selected });
-
-      //  toast on claim success
+      // success handled via websocket
     } catch (err) {
       toast.error("❌ Failed to claim points!");
     } finally {
@@ -88,8 +86,12 @@ export default function App() {
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-10">
           <h1 className="text-4xl md:text-6xl font-extrabold mb-2 text-shadow-purple">Rank Rush</h1>
-          <p className="text-lg md:text-xl text-gray-300 mb-3 tracking-wide ">Competitive Leaderboard System</p>
-          <p className="text-sm md:text-base text-yellow-400 font-medium animate-pulse">Select users, claim random points, and climb the rankings!</p>
+          <p className="text-lg md:text-xl text-gray-300 mb-3 tracking-wide ">
+            Competitive Leaderboard System
+          </p>
+          <p className="text-sm md:text-base text-yellow-400 font-medium animate-pulse">
+            Select users, claim random points, and climb the rankings!
+          </p>
         </header>
 
         {/* Stats Cards */}
@@ -113,45 +115,76 @@ export default function App() {
 
         {/* Game Controls + Leaderboard */}
         <div className="grid grid-cols-1 xl:grid-cols-[400px_1fr] gap-8">
-          {/* Game Controls Panel */}
-          <div className="bg-dark-bg rounded-2xl p-6 border border-border h-fit hover:shadow-xl transition-shadow duration-300">
-            <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⚡ Game Controls</h2>
-            <div className="mb-6">
-              <div className="text-base font-semibold mb-3 flex items-center gap-2 text-text-primary ">👤 Select User</div>
-              <div className="flex gap-3 mb-4">
-                <UserSelect users={users} selected={selected} onChange={setSelected} />
+          {/* Left column: Game Controls + Points History */}
+          <div className="flex flex-col gap-8">
+            {/* Game Controls Panel */}
+            <div className="bg-dark-bg rounded-2xl p-6 border border-border h-fit hover:shadow-xl transition-shadow duration-300">
+              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⚡ Game Controls</h2>
+              <div className="mb-6">
+                <div className="text-base font-semibold mb-3 flex items-center gap-2 text-text-primary ">
+                  👤 Select User
+                </div>
+                <div className="flex gap-3 mb-4">
+                  <UserSelect users={users} selected={selected} onChange={setSelected} />
+                </div>
+              </div>
+
+              <button
+                className="w-full bg-accent-green border-none text-white p-4 rounded-xl text-base font-bold cursor-pointer flex items-center justify-center gap-2 transition-all duration-300 mb-4 hover:bg-emerald-600 hover:-translate-y-1 disabled:opacity-60 disabled:cursor-not-allowed "
+                onClick={claim}
+                disabled={!selected || busy}
+              >
+                {busy ? "Claiming..." : "⚡ Claim Random Points"}
+              </button>
+
+              <div className="text-sm text-text-muted text-center">{readyText}</div>
+
+              {lastAward && (
+                <div className="mt-4 p-3 bg-accent-green bg-opacity-10 rounded-xl border border-accent-green border-opacity-20 animate-pulse">
+                  Awarded <b>+{lastAward.points}</b> points to <b>{lastAward.user}</b>
+                </div>
+              )}
+
+              <div className="mt-6">
+                <AddUserForm onAdded={onAdded} />
               </div>
             </div>
 
-            <button
-              className="w-full bg-accent-green border-none text-white p-4 rounded-xl text-base font-bold cursor-pointer flex items-center justify-center gap-2 transition-all duration-300 mb-4 hover:bg-emerald-600 hover:-translate-y-1 disabled:opacity-60 disabled:cursor-not-allowed "
-              onClick={claim}
-              disabled={!selected || busy}
-            >
-              {busy ? "Claiming..." : "⚡ Claim Random Points"}
-            </button>
-
-            <div className="text-sm text-text-muted text-center">
-              {readyText}
-            </div>
-
-            {lastAward && (
-              <div className="mt-4 p-3 bg-accent-green bg-opacity-10 rounded-xl border border-accent-green border-opacity-20 animate-pulse">
-                Awarded <b>+{lastAward.points}</b> points to <b>{lastAward.user}</b>
+            {/* Points History Panel */}
+            <div className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300">
+              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
+              <div className="relative">
+                <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
+                  {history.map((item) => (
+                    <div
+                      key={item._id}
+                      className="flex items-center p-3 bg-dark-panel rounded-xl mb-2 border border-border hover:bg-dark-bg hover:scale-[1] transition-all duration-300"
+                    >
+                      <div className="w-8 h-8 bg-accent-green rounded-full flex items-center justify-center mr-3 font-bold text-black">
+                        +
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-bold text-text-primary">{item.userName}</div>
+                        <div className="text-sm text-text-muted">
+                          {new Date(item.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="font-bold text-accent-green">+{item.points} points</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-dark-bg to-transparent pointer-events-none "></div>
               </div>
-            )}
-
-            <div className="mt-6">
-              <AddUserForm onAdded={onAdded} />
             </div>
           </div>
 
-          {/* Leaderboard Panel */}
+          {/* Right column: Leaderboard */}
           <div className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300">
-            <h2 className="text-2xl font-bold mb-5 flex items-center gap-2 text-accent-purple">🏆 Leaderboard</h2>
-
+            <h2 className="text-2xl font-bold mb-5 flex items-center gap-2 text-accent-purple">
+              🏆 Leaderboard
+            </h2>
             {leaderboard.map((player, index) => {
-              const maxPoints = Math.max(...leaderboard.map(p => p.totalPoints), 1);
+              const maxPoints = Math.max(...leaderboard.map((p) => p.totalPoints), 1);
               const progressPercentage = (player.totalPoints / maxPoints) * 100;
 
               const getRankBadgeClasses = () => {
@@ -162,7 +195,8 @@ export default function App() {
               };
 
               const getItemClasses = () => {
-                let base = "flex items-center p-4 bg-dark-panel rounded-xl mb-4 border border-border relative overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300";
+                let base =
+                  "flex items-center p-4 bg-dark-panel rounded-xl mb-4 border border-border relative overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300";
                 if (index === 0) return base + " bg-gradient-gold border-yellow-400 shadow-lg shadow-yellow-700";
                 if (index === 1) return base + " bg-gradient-silver border-gray-400";
                 if (index === 2) return base + " bg-gradient-bronze border-orange-700";
@@ -171,13 +205,19 @@ export default function App() {
 
               return (
                 <div key={player._id} className={getItemClasses()}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-extrabold text-sm mr-4 ${getRankBadgeClasses()}`}>
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center font-extrabold text-sm mr-4 ${getRankBadgeClasses()}`}
+                  >
                     {player.rank}
                   </div>
                   <div className="flex-1 flex items-center justify-between">
                     <div>
                       <span className="font-bold text-base text-text-primary">{player.name}</span>
-                      {index === 0 && <span className="bg-accent-gold text-black px-3 py-1 rounded-full text-xs font-bold ml-3">Champion</span>}
+                      {index === 0 && (
+                        <span className="bg-accent-gold text-black px-3 py-1 rounded-full text-xs font-bold ml-3">
+                          Champion
+                        </span>
+                      )}
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-base text-text-primary">{player.totalPoints}</div>
@@ -191,29 +231,6 @@ export default function App() {
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Points History */}
-        <div className="bg-dark-bg rounded-2xl p-6 border border-border mt-8 hover:shadow-xl transition-shadow duration-300">
-          <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
-          <div className="relative">
-            <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
-              {history.map(item => (
-                <div
-                  key={item._id}
-                  className="flex items-center p-3 bg-dark-panel rounded-xl mb-2 border border-border hover:bg-dark-bg hover:scale-[1] transition-all duration-300"
-                >
-                  <div className="w-8 h-8 bg-accent-green rounded-full flex items-center justify-center mr-3 font-bold text-black">+</div>
-                  <div className="flex-1">
-                    <div className="font-bold text-text-primary">{item.userName}</div>
-                    <div className="text-sm text-text-muted">{new Date(item.createdAt).toLocaleString()}</div>
-                  </div>
-                  <div className="font-bold text-accent-green">+{item.points} points</div>
-                </div>
-              ))}
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-dark-bg to-transparent pointer-events-none "></div>
           </div>
         </div>
       </div>
