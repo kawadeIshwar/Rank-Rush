@@ -163,14 +163,19 @@ useEffect(() => {
               </div>
             </div>
 
-         {/* Points History */}
+       {/* Points History */}
 <div
   className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
-  style={{ height: leaderboardHeight ? `${leaderboardHeight}px` : "auto" }}
+  style={{
+    height:
+      leaderboardHeight && history.length > 0
+        ? `${leaderboardHeight - 4 * 72}px` // subtract ~72px per row × 4 rows
+        : "auto",
+  }}
 >
   <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
-  
-  {/* Scrollable list that flexes to fill remaining space */}
+
+  {/* Scrollable list */}
   <div className="flex-1 min-h-0 relative">
     <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
       {history.map((item) => (
