@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { api, API_URL } from "./api";
 import UserSelect from "./components/UserSelect";
@@ -21,12 +21,16 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [lastAward, setLastAward] = useState(null);
 
+  // ref to measure leaderboard height
+  const leaderboardRef = useRef(null);
+  const [leaderboardHeight, setLeaderboardHeight] = useState("auto");
+
   async function load() {
     const [u, lb, st, h] = await Promise.all([
       api.get("/users"),
       api.get("/leaderboard"),
       api.get("/stats"),
-      api.get("/history?limit=20&page=1"),
+      api.get("/history?limit=50&page=1"),
     ]);
     setUsers(u.data);
     setLeaderboard(lb.data);
@@ -44,7 +48,7 @@ export default function App() {
     s.on("update", (payload) => {
       setLeaderboard(payload.leaderboard);
       setStats(payload.stats);
-      setHistory((prev) => [payload.claim, ...prev].slice(0, 20));
+      setHistory((prev) => [payload.claim, ...prev]);
       api.get("/users").then(({ data }) => setUsers(data));
       setLastAward({
         user: payload.claim.userName,
@@ -58,12 +62,18 @@ export default function App() {
     return () => s.disconnect();
   }, []);
 
+  // measure leaderboard height after render
+  useEffect(() => {
+    if (leaderboardRef.current) {
+      setLeaderboardHeight(leaderboardRef.current.offsetHeight);
+    }
+  }, [leaderboard]);
+
   async function claim() {
     if (!selected) return;
     setBusy(true);
     try {
       await api.post("/claim", { userId: selected });
-      // success handled via websocket
     } catch (err) {
       toast.error("❌ Failed to claim points!");
     } finally {
@@ -114,10 +124,10 @@ export default function App() {
         </div>
 
         {/* Game Controls + Leaderboard */}
-        <div className="grid grid-cols-1 xl:grid-cols-[400px_1fr] gap-8 items-stretch">
-          {/* Left column: Game Controls + Points History */}
-          <div className="flex flex-col gap-8 min-h-0">
-            {/* Game Controls Panel */}
+        <div className="grid grid-cols-1 xl:grid-cols-[400px_1fr] gap-8 items-start">
+          {/* Left column */}
+          <div className="flex flex-col gap-8">
+            {/* Game Controls */}
             <div className="bg-dark-bg rounded-2xl p-6 border border-border h-fit hover:shadow-xl transition-shadow duration-300">
               <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⚡ Game Controls</h2>
               <div className="mb-6">
@@ -150,8 +160,11 @@ export default function App() {
               </div>
             </div>
 
-            {/* Points History Panel */}
-            <div className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col flex-1 min-h-0">
+            {/* Points History */}
+            <div
+              className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
+              style={{ height: leaderboardHeight === "auto" ? "auto" : leaderboardHeight }}
+            >
               <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
               <div className="relative flex-1 min-h-0">
                 <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
@@ -173,13 +186,16 @@ export default function App() {
                     </div>
                   ))}
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-dark-bg to-transparent pointer-events-none "></div>
+                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-dark-bg to-transparent pointer-events-none"></div>
               </div>
             </div>
           </div>
 
-          {/* Right column: Leaderboard */}
-          <div className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col">
+          {/* Leaderboard */}
+          <div
+            ref={leaderboardRef}
+            className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
+          >
             <h2 className="text-2xl font-bold mb-5 flex items-center gap-2 text-accent-purple">
               🏆 Leaderboard
             </h2>
@@ -238,4 +254,5 @@ export default function App() {
     </div>
   );
 }
+
 
