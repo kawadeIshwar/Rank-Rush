@@ -62,7 +62,7 @@ export default function App() {
     return () => s.disconnect();
   }, []);
 
-  // measure leaderboard height
+  // useEffect to measure leaderboard height
   useEffect(() => {
     if (leaderboardRef.current) {
       const lbHeight = leaderboardRef.current.getBoundingClientRect().height;
@@ -96,7 +96,9 @@ export default function App() {
     <div className="bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 min-h-screen text-text-primary font-inter p-4 md:p-5">
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-10">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-2 text-shadow-purple">Rank Rush</h1>
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-2 text-shadow-purple">
+            Rank Rush
+          </h1>
           <p className="text-lg md:text-xl text-gray-300 mb-3 tracking-wide ">
             Competitive Leaderboard System
           </p>
@@ -106,7 +108,7 @@ export default function App() {
         </header>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8 ">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
           {[
             { icon: "👥", value: stats.totalUsers, label: "Total Users" },
             { icon: "⚡", value: stats.totalPoints, label: "Total Points" },
@@ -119,14 +121,16 @@ export default function App() {
             >
               <span className="text-3xl mb-2 block">{item.icon}</span>
               <div className="text-4xl font-extrabold mb-1">{item.value}</div>
-              <div className="text-sm text-text-muted font-medium">{item.label}</div>
+              <div className="text-sm text-text-muted font-medium">
+                {item.label}
+              </div>
             </div>
           ))}
         </div>
 
-        {/* Leaderboard (left) + Game Controls + Points History (right) */}
+        {/* Swap Leaderboard LEFT, Game Controls + History RIGHT */}
         <div className="grid grid-cols-1 xl:grid-cols-[400px_1fr] gap-8 items-start">
-          {/* Leaderboard (now on the left) */}
+          {/* Leaderboard (LEFT now) */}
           <div
             ref={leaderboardRef}
             className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
@@ -135,11 +139,16 @@ export default function App() {
               🏆 Leaderboard
             </h2>
             {leaderboard.map((player, index) => {
-              const maxPoints = Math.max(...leaderboard.map((p) => p.totalPoints), 1);
-              const progressPercentage = (player.totalPoints / maxPoints) * 100;
+              const maxPoints = Math.max(
+                ...leaderboard.map((p) => p.totalPoints),
+                1
+              );
+              const progressPercentage =
+                (player.totalPoints / maxPoints) * 100;
 
               const getRankBadgeClasses = () => {
-                if (index === 0) return "bg-accent-gold text-black border border-accent-gold ";
+                if (index === 0)
+                  return "bg-accent-gold text-black border border-accent-gold ";
                 if (index === 1) return "bg-gray-400 text-black";
                 if (index === 2) return "bg-accent-orange text-white";
                 return "bg-gray-600 text-white";
@@ -149,7 +158,10 @@ export default function App() {
                 let base =
                   "flex items-center p-4 bg-dark-panel rounded-xl mb-4 border border-border relative overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300";
                 if (index === 0)
-                  return base + " bg-gradient-gold border-yellow-400 shadow-lg shadow-yellow-700";
+                  return (
+                    base +
+                    " bg-gradient-gold border-yellow-400 shadow-lg shadow-yellow-700"
+                  );
                 if (index === 1) return base + " bg-gradient-silver border-gray-400";
                 if (index === 2) return base + " bg-gradient-bronze border-orange-700";
                 return base;
@@ -164,7 +176,9 @@ export default function App() {
                   </div>
                   <div className="flex-1 flex items-center justify-between">
                     <div>
-                      <span className="font-bold text-base text-text-primary">{player.name}</span>
+                      <span className="font-bold text-base text-text-primary">
+                        {player.name}
+                      </span>
                       {index === 0 && (
                         <span className="bg-accent-gold text-black px-3 py-1 rounded-full text-xs font-bold ml-3">
                           Champion
@@ -172,7 +186,9 @@ export default function App() {
                       )}
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-base text-text-primary">{player.totalPoints}</div>
+                      <div className="font-bold text-base text-text-primary">
+                        {player.totalPoints}
+                      </div>
                       <div className="text-xs text-text-muted">points</div>
                     </div>
                   </div>
@@ -185,32 +201,41 @@ export default function App() {
             })}
           </div>
 
-          {/* Right column (Game Controls + Points History) */}
+          {/* Game Controls + Points History (RIGHT now) */}
           <div className="flex flex-col gap-8">
             {/* Game Controls */}
             <div className="bg-dark-bg rounded-2xl p-6 border border-border h-fit hover:shadow-xl transition-shadow duration-300">
-              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⚡ Game Controls</h2>
+              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">
+                ⚡ Game Controls
+              </h2>
               <div className="mb-6">
                 <div className="text-base font-semibold mb-3 flex items-center gap-2 text-text-primary">
                   👤 Select User
                 </div>
                 <div className="flex gap-3 mb-4">
-                  <UserSelect users={users} selected={selected} onChange={setSelected} />
+                  <UserSelect
+                    users={users}
+                    selected={selected}
+                    onChange={setSelected}
+                  />
                 </div>
               </div>
               <button
                 className="w-full bg-accent-green border-none text-white p-4 rounded-xl text-base font-bold cursor-pointer
-                flex items-center justify-center gap-2 transition-all duration-300 mb-4 hover:bg-emerald-600 hover:-translate-y-1 
-                disabled:opacity-60 disabled:cursor-not-allowed"
+                  flex items-center justify-center gap-2 transition-all duration-300 mb-4 hover:bg-emerald-600 hover:-translate-y-1 
+                  disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={claim}
                 disabled={!selected || busy}
               >
                 {busy ? "Claiming..." : "⚡ Claim Random Points"}
               </button>
-              <div className="text-sm text-text-muted text-center">{readyText}</div>
+              <div className="text-sm text-text-muted text-center">
+                {readyText}
+              </div>
               {lastAward && (
                 <div className="mt-4 p-3 bg-accent-green bg-opacity-10 rounded-xl border border-accent-green border-opacity-20 animate-pulse">
-                  Awarded <b>+{lastAward.points}</b> points to <b>{lastAward.user}</b>
+                  Awarded <b>+{lastAward.points}</b> points to{" "}
+                  <b>{lastAward.user}</b>
                 </div>
               )}
               <div className="mt-6">
@@ -228,8 +253,9 @@ export default function App() {
                     : "auto",
               }}
             >
-              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
-
+              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">
+                ⏱️ Points History
+              </h2>
               <div className="flex-1 min-h-0 relative">
                 <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
                   {history.map((item) => (
@@ -241,12 +267,16 @@ export default function App() {
                         +
                       </div>
                       <div className="flex-1">
-                        <div className="font-bold text-text-primary">{item.userName}</div>
+                        <div className="font-bold text-text-primary">
+                          {item.userName}
+                        </div>
                         <div className="text-sm text-text-muted">
                           {new Date(item.createdAt).toLocaleString()}
                         </div>
                       </div>
-                      <div className="font-bold text-accent-green">+{item.points} points</div>
+                      <div className="font-bold text-accent-green">
+                        +{item.points} points
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -259,3 +289,4 @@ export default function App() {
     </div>
   );
 }
+
