@@ -63,11 +63,13 @@ export default function App() {
   }, []);
 
   // measure leaderboard height after render
-  useEffect(() => {
-    if (leaderboardRef.current) {
-      setLeaderboardHeight(leaderboardRef.current.offsetHeight);
-    }
-  }, [leaderboard]);
+useEffect(() => {
+  if (leaderboardRef.current) {
+    const lbHeight = leaderboardRef.current.getBoundingClientRect().height;
+    setLeaderboardHeight(lbHeight);
+  }
+}, [leaderboard]);
+
 
   async function claim() {
     if (!selected) return;
@@ -160,35 +162,36 @@ export default function App() {
               </div>
             </div>
 
-            {/* Points History */}
-            <div
-              className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
-              style={{ height: leaderboardHeight }}
-            >
-              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
-              <div className="relative flex-1 min-h-0">
-                <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
-                  {history.map((item) => (
-                    <div
-                      key={item._id}
-                      className="flex items-center p-3 bg-dark-panel rounded-xl mb-2 border border-border hover:bg-dark-bg transition-all duration-300"
-                    >
-                      <div className="w-8 h-8 bg-accent-green rounded-full flex items-center justify-center mr-3 font-bold text-black">
-                        +
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-bold text-text-primary">{item.userName}</div>
-                        <div className="text-sm text-text-muted">
-                          {new Date(item.createdAt).toLocaleString()}
-                        </div>
-                      </div>
-                      <div className="font-bold text-accent-green">+{item.points} points</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-dark-bg to-transparent pointer-events-none"></div>
-              </div>
+           {/* Points History */}
+<div
+  className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
+  style={{ height: leaderboardHeight ? `${leaderboardHeight}px` : "auto" }}
+>
+  <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
+  <div className="relative flex-1 min-h-0">
+    <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
+      {history.map((item) => (
+        <div
+          key={item._id}
+          className="flex items-center p-3 bg-dark-panel rounded-xl mb-2 border border-border hover:bg-dark-bg transition-all duration-300"
+        >
+          <div className="w-8 h-8 bg-accent-green rounded-full flex items-center justify-center mr-3 font-bold text-black">
+            +
+          </div>
+          <div className="flex-1">
+            <div className="font-bold text-text-primary">{item.userName}</div>
+            <div className="text-sm text-text-muted">
+              {new Date(item.createdAt).toLocaleString()}
             </div>
+          </div>
+          <div className="font-bold text-accent-green">+{item.points} points</div>
+        </div>
+      ))}
+    </div>
+    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-dark-bg to-transparent pointer-events-none"></div>
+  </div>
+</div>
+
           </div>
 
           {/* Leaderboard */}
