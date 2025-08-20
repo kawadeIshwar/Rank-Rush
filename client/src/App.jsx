@@ -169,7 +169,7 @@ useEffect(() => {
   style={{
     height:
       leaderboardHeight && history.length > 0
-        ? `${leaderboardHeight - 5 * 72}px` // subtract ~72px per row × 4 rows
+        ? `${leaderboardHeight - 5.6 * 72}px` // subtract ~72px per row × 4 rows
         : "auto",
   }}
 >
