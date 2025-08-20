@@ -44,11 +44,23 @@ router.post("/seed", async (req, res) => {
 router.post("/users", async (req, res) => {
   const { name } = req.body || {};
   if (!name?.trim()) return res.status(400).json({ error: "Name is required" });
+  
   try {
+    // Check if user already exists
+    const existingUser = await User.findOne({ name: name.trim() });
+    if (existingUser) {
+      return res.status(400).json({ error: "User with this name already exists" });
+    }
+    
     const user = await User.create({ name: name.trim() });
     res.json(user);
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    console.error('User creation error:', e);
+    if (e.code === 11000) {
+      res.status(400).json({ error: "User with this name already exists" });
+    } else {
+      res.status(400).json({ error: e.message });
+    }
   }
 });
 
@@ -68,27 +80,33 @@ router.get("/users", async (req, res) => {
 router.post("/claim", async (req, res) => {
   const { userId } = req.body || {};
   if (!userId) return res.status(400).json({ error: "userId is required" });
-  const points = Math.floor(Math.random() * 10) + 1; // 1-10
+  
+  try {
+    const points = Math.floor(Math.random() * 10) + 1; // 1-10
 
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { $inc: { totalPoints: points } },
-    { new: true }
-  );
-  if (!user) return res.status(404).json({ error: "User not found" });
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $inc: { totalPoints: points } },
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-  const claim = await Claim.create({ userId, points });
+    const claim = await Claim.create({ userId, points });
 
-  const payload = {
-    claim: { _id: claim._id, userId, userName: user.name, points, createdAt: claim.createdAt },
-    leaderboard: await buildLeaderboard(),
-    stats: await stats()
-  };
+    const payload = {
+      claim: { _id: claim._id, userId, userName: user.name, points, createdAt: claim.createdAt },
+      leaderboard: await buildLeaderboard(),
+      stats: await stats()
+    };
 
-  // notify sockets
-  req.io?.emit("update", payload);
+    // notify sockets
+    req.io?.emit("update", payload);
 
-  res.json(payload);
+    res.json(payload);
+  } catch (e) {
+    console.error('Claim points error:', e);
+    res.status(500).json({ error: "Failed to claim points: " + e.message });
+  }
 });
 
 // Get leaderboard

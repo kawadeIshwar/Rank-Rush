@@ -25,6 +25,9 @@ app.use(cors({
   credentials: true
 }));
 
+// ✅ Parse JSON requests
+app.use(express.json());
+
 // ✅ Socket.io CORS
 const io = new Server(server, {
   cors: {
