@@ -62,13 +62,14 @@ export default function App() {
     return () => s.disconnect();
   }, []);
 
-  // measure leaderboard height after render
+// useEffect to measure leaderboard height
 useEffect(() => {
   if (leaderboardRef.current) {
     const lbHeight = leaderboardRef.current.getBoundingClientRect().height;
     setLeaderboardHeight(lbHeight);
   }
 }, [leaderboard]);
+
 
 
   async function claim() {
@@ -162,13 +163,15 @@ useEffect(() => {
               </div>
             </div>
 
-           {/* Points History */}
+         {/* Points History */}
 <div
   className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
   style={{ height: leaderboardHeight ? `${leaderboardHeight}px` : "auto" }}
 >
   <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
-  <div className="relative flex-1 min-h-0">
+  
+  {/* Scrollable list that flexes to fill remaining space */}
+  <div className="flex-1 min-h-0 relative">
     <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
       {history.map((item) => (
         <div
@@ -191,6 +194,7 @@ useEffect(() => {
     <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-dark-bg to-transparent pointer-events-none"></div>
   </div>
 </div>
+
 
           </div>
 
