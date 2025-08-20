@@ -21,7 +21,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [lastAward, setLastAward] = useState(null);
 
-  // ref to measure leaderboard height
+  // refs to measure leaderboard height
   const leaderboardRef = useRef(null);
   const [leaderboardHeight, setLeaderboardHeight] = useState("auto");
 
@@ -163,7 +163,7 @@ export default function App() {
             {/* Points History */}
             <div
               className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
-              style={{ height: leaderboardHeight === "auto" ? "auto" : leaderboardHeight }}
+              style={{ height: leaderboardHeight }}
             >
               <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
               <div className="relative flex-1 min-h-0">
@@ -254,4 +254,3 @@ export default function App() {
     </div>
   );
 }
-
