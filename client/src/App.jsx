@@ -116,7 +116,7 @@ export default function App() {
         {/* Game Controls + Leaderboard */}
         <div className="grid grid-cols-1 xl:grid-cols-[400px_1fr] gap-8 items-stretch">
           {/* Left column: Game Controls + Points History */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-8 min-h-0">
             {/* Game Controls Panel */}
             <div className="bg-dark-bg rounded-2xl p-6 border border-border h-fit hover:shadow-xl transition-shadow duration-300">
               <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⚡ Game Controls</h2>
@@ -151,9 +151,9 @@ export default function App() {
             </div>
 
             {/* Points History Panel */}
-            <div className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col flex-1">
+            <div className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col flex-1 min-h-0">
               <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
-              <div className="relative flex-1">
+              <div className="relative flex-1 min-h-0">
                 <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
                   {history.map((item) => (
                     <div
@@ -238,3 +238,4 @@ export default function App() {
     </div>
   );
 }
+
