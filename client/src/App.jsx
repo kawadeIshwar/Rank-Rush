@@ -114,7 +114,7 @@ export default function App() {
         </div>
 
         {/* Game Controls + Leaderboard */}
-        <div className="grid grid-cols-1 xl:grid-cols-[400px_1fr] gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-[400px_1fr] gap-8 items-stretch">
           {/* Left column: Game Controls + Points History */}
           <div className="flex flex-col gap-8">
             {/* Game Controls Panel */}
@@ -151,14 +151,14 @@ export default function App() {
             </div>
 
             {/* Points History Panel */}
-            <div className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300">
+            <div className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col flex-1">
               <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
-              <div className="relative">
-                <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
+              <div className="relative flex-1">
+                <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
                   {history.map((item) => (
                     <div
                       key={item._id}
-                      className="flex items-center p-3 bg-dark-panel rounded-xl mb-2 border border-border hover:bg-dark-bg hover:scale-[1] transition-all duration-300"
+                      className="flex items-center p-3 bg-dark-panel rounded-xl mb-2 border border-border hover:bg-dark-bg transition-all duration-300"
                     >
                       <div className="w-8 h-8 bg-accent-green rounded-full flex items-center justify-center mr-3 font-bold text-black">
                         +
@@ -179,7 +179,7 @@ export default function App() {
           </div>
 
           {/* Right column: Leaderboard */}
-          <div className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300">
+          <div className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col">
             <h2 className="text-2xl font-bold mb-5 flex items-center gap-2 text-accent-purple">
               🏆 Leaderboard
             </h2>
@@ -197,7 +197,8 @@ export default function App() {
               const getItemClasses = () => {
                 let base =
                   "flex items-center p-4 bg-dark-panel rounded-xl mb-4 border border-border relative overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300";
-                if (index === 0) return base + " bg-gradient-gold border-yellow-400 shadow-lg shadow-yellow-700";
+                if (index === 0)
+                  return base + " bg-gradient-gold border-yellow-400 shadow-lg shadow-yellow-700";
                 if (index === 1) return base + " bg-gradient-silver border-gray-400";
                 if (index === 2) return base + " bg-gradient-bronze border-orange-700";
                 return base;
