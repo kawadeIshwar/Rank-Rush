@@ -62,15 +62,13 @@ export default function App() {
     return () => s.disconnect();
   }, []);
 
-// useEffect to measure leaderboard height
-useEffect(() => {
-  if (leaderboardRef.current) {
-    const lbHeight = leaderboardRef.current.getBoundingClientRect().height;
-    setLeaderboardHeight(lbHeight);
-  }
-}, [leaderboard]);
-
-
+  // measure leaderboard height
+  useEffect(() => {
+    if (leaderboardRef.current) {
+      const lbHeight = leaderboardRef.current.getBoundingClientRect().height;
+      setLeaderboardHeight(lbHeight);
+    }
+  }, [leaderboard]);
 
   async function claim() {
     if (!selected) return;
@@ -126,67 +124,8 @@ useEffect(() => {
           ))}
         </div>
 
-     {/* Game Controls + Leaderboard */}
+        {/* Leaderboard (LEFT) + Game Controls + History (RIGHT) */}
         <div className="grid grid-cols-1 xl:grid-cols-[400px_1fr] gap-8 items-start">
-          {/* Left column */} 
-          <div className="flex flex-col gap-8"> 
-            {/* Game Controls */} 
-            <div className="bg-dark-bg rounded-2xl p-6 border border-border h-fit hover:shadow-xl transition-shadow duration-300"> 
-              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⚡ Game Controls</h2>
-              <div className="mb-6"> 
-                <div className="text-base font-semibold mb-3 flex items-center gap-2 text-text-primary "> 👤 Select User </div>
-                <div className="flex gap-3 mb-4"> <UserSelect users={users} selected={selected} onChange={setSelected} />
-                </div>
-              </div>
-              <button className="w-full bg-accent-green border-none text-white p-4 rounded-xl text-base font-bold cursor-pointer
-                flex items-center justify-center gap-2 transition-all duration-300 mb-4 hover:bg-emerald-600 hover:-translate-y-1 
-                disabled:opacity-60 disabled:cursor-not-allowed " onClick={claim} disabled={!selected || busy} > {busy ? "Claiming..." : "⚡ Claim Random Points"} </button> 
-              <div className="text-sm text-text-muted text-center">{readyText}
-              </div> 
-              {lastAward && ( <div className="mt-4 p-3 bg-accent-green bg-opacity-10 rounded-xl border border-accent-green border-opacity-20 animate-pulse"> Awarded <b>+{lastAward.points}</b> points to <b>{lastAward.user}</b> </div> )}
-              <div className="mt-6"> <AddUserForm onAdded={onAdded} /> </div>
-            </div>
-
-       {/* Points History */}
-<div
-  className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
-  style={{
-    height:
-      leaderboardHeight && history.length > 0
-        ? `${leaderboardHeight - 5.6 * 72}px` // subtract ~72px per row × 4 rows
-        : "auto",
-  }}
->
-  <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
-
-  {/* Scrollable list */}
-  <div className="flex-1 min-h-0 relative">
-    <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
-      {history.map((item) => (
-        <div
-          key={item._id}
-          className="flex items-center p-3 bg-dark-panel rounded-xl mb-2 border border-border hover:bg-dark-bg transition-all duration-300"
-        >
-          <div className="w-8 h-8 bg-accent-green rounded-full flex items-center justify-center mr-3 font-bold text-black">
-            +
-          </div>
-          <div className="flex-1">
-            <div className="font-bold text-text-primary">{item.userName}</div>
-            <div className="text-sm text-text-muted">
-              {new Date(item.createdAt).toLocaleString()}
-            </div>
-          </div>
-          <div className="font-bold text-accent-green">+{item.points} points</div>
-        </div>
-      ))}
-    </div>
-    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-dark-bg to-transparent pointer-events-none"></div>
-  </div>
-</div>
-
-
-          </div>
-
           {/* Leaderboard */}
           <div
             ref={leaderboardRef}
@@ -244,6 +183,76 @@ useEffect(() => {
                 </div>
               );
             })}
+          </div>
+
+          {/* Game Controls + History */}
+          <div className="flex flex-col gap-8">
+            {/* Game Controls */}
+            <div className="bg-dark-bg rounded-2xl p-6 border border-border h-fit hover:shadow-xl transition-shadow duration-300">
+              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⚡ Game Controls</h2>
+              <div className="mb-6">
+                <div className="text-base font-semibold mb-3 flex items-center gap-2 text-text-primary">
+                  👤 Select User
+                </div>
+                <div className="flex gap-3 mb-4">
+                  <UserSelect users={users} selected={selected} onChange={setSelected} />
+                </div>
+              </div>
+              <button
+                className="w-full bg-accent-green border-none text-white p-4 rounded-xl text-base font-bold cursor-pointer
+                flex items-center justify-center gap-2 transition-all duration-300 mb-4 hover:bg-emerald-600 hover:-translate-y-1 
+                disabled:opacity-60 disabled:cursor-not-allowed"
+                onClick={claim}
+                disabled={!selected || busy}
+              >
+                {busy ? "Claiming..." : "⚡ Claim Random Points"}
+              </button>
+              <div className="text-sm text-text-muted text-center">{readyText}</div>
+              {lastAward && (
+                <div className="mt-4 p-3 bg-accent-green bg-opacity-10 rounded-xl border border-accent-green border-opacity-20 animate-pulse">
+                  Awarded <b>+{lastAward.points}</b> points to <b>{lastAward.user}</b>
+                </div>
+              )}
+              <div className="mt-6">
+                <AddUserForm onAdded={onAdded} />
+              </div>
+            </div>
+
+            {/* Points History */}
+            <div
+              className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
+              style={{
+                height:
+                  leaderboardHeight && history.length > 0
+                    ? `${leaderboardHeight - 4 * 72}px` // subtract 4 users worth of height
+                    : "auto",
+              }}
+            >
+              <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
+
+              <div className="flex-1 min-h-0 relative">
+                <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
+                  {history.map((item) => (
+                    <div
+                      key={item._id}
+                      className="flex items-center p-3 bg-dark-panel rounded-xl mb-2 border border-border hover:bg-dark-bg transition-all duration-300"
+                    >
+                      <div className="w-8 h-8 bg-accent-green rounded-full flex items-center justify-center mr-3 font-bold text-black">
+                        +
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-bold text-text-primary">{item.userName}</div>
+                        <div className="text-sm text-text-muted">
+                          {new Date(item.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="font-bold text-accent-green">+{item.points} points</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-dark-bg to-transparent pointer-events-none"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
