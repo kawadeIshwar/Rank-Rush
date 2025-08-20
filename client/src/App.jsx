@@ -124,9 +124,9 @@ export default function App() {
           ))}
         </div>
 
-        {/* Leaderboard (LEFT) + Game Controls + History (RIGHT) */}
+        {/* Leaderboard (left) + Game Controls + Points History (right) */}
         <div className="grid grid-cols-1 xl:grid-cols-[400px_1fr] gap-8 items-start">
-          {/* Leaderboard */}
+          {/* Leaderboard (now on the left) */}
           <div
             ref={leaderboardRef}
             className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
@@ -185,7 +185,7 @@ export default function App() {
             })}
           </div>
 
-          {/* Game Controls + History */}
+          {/* Right column (Game Controls + Points History) */}
           <div className="flex flex-col gap-8">
             {/* Game Controls */}
             <div className="bg-dark-bg rounded-2xl p-6 border border-border h-fit hover:shadow-xl transition-shadow duration-300">
@@ -224,7 +224,7 @@ export default function App() {
               style={{
                 height:
                   leaderboardHeight && history.length > 0
-                    ? `${leaderboardHeight - 4 * 72}px` // subtract 4 users worth of height
+                    ? `${leaderboardHeight - 5.6 * 72}px`
                     : "auto",
               }}
             >
