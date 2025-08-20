@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { io } from "socket.io-client";
 import { api, API_URL } from "./api";
 import UserSelect from "./components/UserSelect";
@@ -20,10 +20,6 @@ export default function App() {
   });
   const [busy, setBusy] = useState(false);
   const [lastAward, setLastAward] = useState(null);
-
-  // ref to measure leaderboard height
-  const leaderboardRef = useRef(null);
-  const [leaderboardHeight, setLeaderboardHeight] = useState("auto");
 
   async function load() {
     const [u, lb, st, h] = await Promise.all([
@@ -61,13 +57,6 @@ export default function App() {
     });
     return () => s.disconnect();
   }, []);
-
-  // measure leaderboard height after render
-  useEffect(() => {
-    if (leaderboardRef.current) {
-      setLeaderboardHeight(leaderboardRef.current.offsetHeight);
-    }
-  }, [leaderboard]);
 
   async function claim() {
     if (!selected) return;
@@ -163,11 +152,10 @@ export default function App() {
             {/* Points History */}
             <div
               className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
-              style={{ height: leaderboardHeight === "auto" ? "auto" : leaderboardHeight }}
             >
               <h2 className="text-2xl font-bold mb-5 flex items-center gap-2">⏱️ Points History</h2>
               <div className="relative flex-1 min-h-0">
-                <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
+                <div className="max-h-[6*88px] h-full overflow-y-auto scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
                   {history.map((item) => (
                     <div
                       key={item._id}
@@ -186,73 +174,75 @@ export default function App() {
                     </div>
                   ))}
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-dark-bg to-transparent pointer-events-none"></div>
               </div>
             </div>
           </div>
 
           {/* Leaderboard */}
           <div
-            ref={leaderboardRef}
             className="bg-dark-bg rounded-2xl p-6 border border-border hover:shadow-xl transition-shadow duration-300 flex flex-col"
           >
             <h2 className="text-2xl font-bold mb-5 flex items-center gap-2 text-accent-purple">
               🏆 Leaderboard
             </h2>
-            {leaderboard.map((player, index) => {
-              const maxPoints = Math.max(...leaderboard.map((p) => p.totalPoints), 1);
-              const progressPercentage = (player.totalPoints / maxPoints) * 100;
+            <div className="max-h-[6*88px] overflow-y-auto pr-1 scrollbar-thin scrollbar-track-dark-panel scrollbar-thumb-accent-purple hover:scrollbar-thumb-accent-purple/80">
+              {leaderboard.map((player, index) => {
+                const maxPoints = Math.max(...leaderboard.map((p) => p.totalPoints), 1);
+                const progressPercentage = (player.totalPoints / maxPoints) * 100;
 
-              const getRankBadgeClasses = () => {
-                if (index === 0) return "bg-accent-gold text-black border border-accent-gold ";
-                if (index === 1) return "bg-gray-400 text-black";
-                if (index === 2) return "bg-accent-orange text-white";
-                return "bg-gray-600 text-white";
-              };
+                const getRankBadgeClasses = () => {
+                  if (index === 0) return "bg-accent-gold text-black border border-accent-gold ";
+                  if (index === 1) return "bg-gray-400 text-black";
+                  if (index === 2) return "bg-accent-orange text-white";
+                  return "bg-gray-600 text-white";
+                };
 
-              const getItemClasses = () => {
-                let base =
-                  "flex items-center p-4 bg-dark-panel rounded-xl mb-4 border border-border relative overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300";
-                if (index === 0)
-                  return base + " bg-gradient-gold border-yellow-400 shadow-lg shadow-yellow-700";
-                if (index === 1) return base + " bg-gradient-silver border-gray-400";
-                if (index === 2) return base + " bg-gradient-bronze border-orange-700";
-                return base;
-              };
+                const getItemClasses = () => {
+                  let base =
+                    "flex items-center p-4 bg-dark-panel rounded-xl mb-4 border border-border relative overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300";
+                  if (index === 0)
+                    return base + " bg-gradient-gold border-yellow-400 shadow-lg shadow-yellow-700";
+                  if (index === 1) return base + " bg-gradient-silver border-gray-400";
+                  if (index === 2) return base + " bg-gradient-bronze border-orange-700";
+                  return base;
+                };
 
-              return (
-                <div key={player._id} className={getItemClasses()}>
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center font-extrabold text-sm mr-4 ${getRankBadgeClasses()}`}
-                  >
-                    {player.rank}
-                  </div>
-                  <div className="flex-1 flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-base text-text-primary">{player.name}</span>
-                      {index === 0 && (
-                        <span className="bg-accent-gold text-black px-3 py-1 rounded-full text-xs font-bold ml-3">
-                          Champion
-                        </span>
-                      )}
+                return (
+                  <div key={player._id} className={getItemClasses()}>
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center font-extrabold text-sm mr-4 ${getRankBadgeClasses()}`}
+                    >
+                      {player.rank}
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-base text-text-primary">{player.totalPoints}</div>
-                      <div className="text-xs text-text-muted">points</div>
+                    <div className="flex-1 flex items-center justify-between">
+                      <div>
+                        <span className="font-bold text-base text-text-primary">{player.name}</span>
+                        {index === 0 && (
+                          <span className="bg-accent-gold text-black px-3 py-1 rounded-full text-xs font-bold ml-3">
+                            Champion
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-base text-text-primary">{player.totalPoints}</div>
+                        <div className="text-xs text-text-muted">points</div>
+                      </div>
                     </div>
+                    <div
+                      className="absolute bottom-0 left-0 h-1 bg-accent-gold rounded-b-xl transition-all duration-500 ease-out"
+                      style={{ width: `${progressPercentage}%` }}
+                    ></div>
                   </div>
-                  <div
-                    className="absolute bottom-0 left-0 h-1 bg-accent-gold rounded-b-xl transition-all duration-500 ease-out"
-                    style={{ width: `${progressPercentage}%` }}
-                  ></div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
 }
 
 
