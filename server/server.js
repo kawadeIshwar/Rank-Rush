@@ -10,27 +10,29 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
-// ✅ Allow both local frontend (for dev) and Netlify frontend (for prod)
+// ✅ Explicitly allow dev + prod frontends
 const allowedOrigins = [
-  "http://localhost:5173",   // Vite dev server
-  "http://localhost:3000",   // React dev server
-  "https://rank-rush1.netlify.app" // Production
+  "http://localhost:5173",          // Vite dev server
+  "https://rank-rush1.netlify.app", // Netlify production
 ];
 
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Socket.io with CORS
+// ✅ API CORS
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
+// ✅ Socket.io CORS
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
+    credentials: true
   },
 });
-
-// ✅ Middleware
-app.use(cors({ origin: allowedOrigins }));
-app.use(express.json());
 
 // ✅ Attach socket.io instance to requests
 app.use((req, res, next) => {
@@ -49,7 +51,15 @@ async function start() {
   try {
     await connectDB(process.env.MONGO_URI || "mongodb://localhost:27017/rank_rush");
     server.listen(PORT, () => {
-      console.log(`🚀 Server on http://localhost:${PORT}`);
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+
+    // Debug socket connections
+    io.on("connection", (socket) => {
+      console.log(`✅ Socket connected: ${socket.id}`);
+      socket.on("disconnect", () => {
+        console.log(`❌ Socket disconnected: ${socket.id}`);
+      });
     });
   } catch (err) {
     console.error(err);
